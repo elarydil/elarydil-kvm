@@ -51,13 +51,13 @@ backend with simulated USB devices and monitors.
 | Event | Workflow | Runners |
 |---|---|---|
 | Pull request | `build-and-test` | Linux: Rust tests, CLI tests, string catalog check, UI tests |
-| Push to `main` | `build-and-test` | Linux: the same checks |
-| Push to `main` | `release-installers` | Windows: Rust tests and CLI tests |
-| Push to `main` with a new version | `release-installers` | Also the Windows installer, the macOS DMG, the Linux `.deb`/`.rpm`, and publishing the release |
+| Push to `main` | `release-installers` | `build-and-test` on Linux plus Rust and CLI tests on Windows |
+| Push to `main` with a new version | `release-installers` | After all tests pass: the Windows installer, the macOS DMG, the Linux `.deb`/`.rpm`, and publishing the release |
 
 Other branches run nothing until a pull request is opened. A short `plan` job checks
 that every file carries the same version and whether `v<version>` is already
-released; if it is, the installers are skipped. macOS runner minutes are the most
+released; if it is, the installers are skipped. If any test fails, nothing is built
+and no runner minutes are spent on installers. macOS runner minutes are the most
 expensive, so macOS only runs for a new release. To build installers for an existing
 version without changing its release, start `release-installers` manually from the
 Actions tab with *Build the installers* checked. Build artifacts are kept for 7 days.

@@ -253,6 +253,7 @@ test("wizard live capture shows edge timing then creates two usable rules", asyn
     .click();
   const d = page.getByRole("dialog");
   await d.getByRole("button", { name: "Start capture", exact: true }).click();
+  await expect(d.getByText("Press the switch on your KVM", { exact: true })).toBeVisible();
   await expect(d.locator(".capture-table tbody tr")).toHaveCount(0);
   await rpc("test.usb", { present: ["usb_1", "usb_2"] });
   await expect(d.locator(".capture-table tbody tr")).toHaveCount(1);
@@ -341,6 +342,7 @@ test("wizard capture sorts by phase and selects trigger devices per direction", 
   await page.getByRole("button", { name: "Setup wizard", exact: true }).first().click();
   const d = page.getByRole("dialog");
   await d.getByRole("button", { name: "Start capture", exact: true }).click();
+  await expect(d.getByText("Press the switch on your KVM", { exact: true })).toBeVisible();
   await rpc("test.usb", { present: ["usb_1", "usb_2"] });
   await rpc("test.usb", { present: ["usb_2"] });
   await expect(d.locator(".capture-table tbody tr")).toHaveCount(2);
@@ -728,6 +730,7 @@ test.describe("readme screenshots", () => {
     await page.getByRole("button", { name: "Setup wizard", exact: true }).first().click();
     const d = page.getByRole("dialog");
     await d.getByRole("button", { name: "Start capture", exact: true }).click();
+    await expect(d.getByText("Press the switch on your KVM", { exact: true })).toBeVisible();
     await rpc("test.usb", { present: ["usb_1", "usb_2"] });
     await rpc("test.usb", { present: ["usb_2"] });
     await rpc("test.usb", { present: [] });

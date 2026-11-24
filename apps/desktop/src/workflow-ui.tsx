@@ -599,6 +599,11 @@ type Capture = {
 type Direction = "disconnect" | "connect";
 /** Devices that change within this window of the first one are selected by
  * default; slower ones usually re-enumerate late and only delay switching. */
+/** Setup-hold requests run one at a time, in the order they were made. */
+let setupRequests: Promise<unknown> = Promise.resolve();
+function queueSetupRequest(send: () => Promise<unknown> | undefined) {
+  setupRequests = setupRequests.then(send).catch(() => {});
+}
 export const TRIGGER_WINDOW_MS = 100;
 const at = (o: Observation, d: Direction) =>
   d === "disconnect" ? o.disconnectedAtMs : o.connectedAtMs;
@@ -760,20 +765,20 @@ export function Wizard({
   // so it lapses on its own if this window disappears.
   useEffect(() => {
     let alive = true;
-    const hold = () => request("wizard.hold", { ms: 15000 }).catch(() => {});
-    void request("wizard.cancel")
-      .catch(() => {})
-      .then(() => {
-        if (alive) void hold();
-      });
-    const timer = setInterval(() => void hold(), 5000);
+    // Requests go through one queue: a release from a previous close must not
+    // reach the agent after the hold of a quick reopen and drop the pause.
+    const hold = () =>
+      queueSetupRequest(() =>
+        alive ? request("wizard.hold", { ms: 15000 }) : undefined,
+      );
+    queueSetupRequest(() => request("wizard.cancel"));
+    hold();
+    const timer = setInterval(hold, 5000);
     return () => {
       alive = false;
       clearInterval(timer);
-      void request("wizard.cancel")
-        .catch(() => {})
-        .then(() => request("wizard.hold", { release: true }))
-        .catch(() => {});
+      queueSetupRequest(() => request("wizard.cancel"));
+      queueSetupRequest(() => request("wizard.hold", { release: true }));
     };
   }, []);
   useEffect(() => {
@@ -810,6 +815,8 @@ export function Wizard({
   async function start() {
     try {
       setError("");
+      // The cancel sent on opening must reach the agent before the new capture.
+      await setupRequests;
       await act("wizard.start", { cycles: 1 });
       setCapture(null);
       setManual(false);

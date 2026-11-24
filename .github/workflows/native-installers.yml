@@ -1,8 +1,8 @@
 name: release-installers
-# Runs only on main. Every push runs the Windows tests. The Windows installer,
-# the macOS DMG and the Linux packages are built, and a release published, only
-# when tauri.conf.json has a version without a GitHub release yet
-# (see packages/bump-version.py).
+# Runs only on main. Every push runs the Linux and Windows tests (ci.yml). Only
+# when all of them pass, and tauri.conf.json has a version without a GitHub
+# release yet (see packages/bump-version.py), are the Windows installer, the
+# macOS DMG and the Linux packages built and the release published.
 on:
   push:
     branches: [main]
@@ -48,9 +48,13 @@ jobs:
           echo "release=$release" >> "$GITHUB_OUTPUT"
           echo "build=$build" >> "$GITHUB_OUTPUT"
 
+  tests:
+    # Linux and Windows test suites; nothing is built if any of them fails.
+    uses: ./.github/workflows/ci.yml
+
   windows:
-    # Tests run on every push to main; the installer only when one is needed.
-    needs: plan
+    needs: [plan, tests]
+    if: needs.plan.outputs.build == 'true'
     runs-on: windows-latest
     timeout-minutes: 60
     steps:
@@ -58,21 +62,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-node@v4
         with: {node-version: 22}
-      - run: cargo test --workspace --locked
-      - run: cargo build --locked
-      - run: python tests/cli_smoke.py
-        timeout-minutes: 2
-      - if: needs.plan.outputs.build == 'true'
-        run: python packages/build.py
-      - if: needs.plan.outputs.build == 'true'
-        run: python packages/check-windows-binaries.py
-      - if: needs.plan.outputs.build == 'true'
-        run: npm ci && npm run tauri build -- --bundles nsis
+      - run: python packages/build.py
+      - run: python packages/check-windows-binaries.py
+      - run: npm ci && npm run tauri build -- --bundles nsis
         working-directory: apps/desktop
-      - if: needs.plan.outputs.build == 'true'
-        run: python packages/check-windows-binaries.py --gui apps/desktop/src-tauri/target/release/elarydil-kvm-gui.exe
-      - if: needs.plan.outputs.build == 'true'
-        uses: actions/upload-artifact@v4
+      - run: python packages/check-windows-binaries.py --gui apps/desktop/src-tauri/target/release/elarydil-kvm-gui.exe
+      - uses: actions/upload-artifact@v4
         with:
           name: elarydil-kvm-windows-x64
           retention-days: 7
@@ -82,8 +77,8 @@ jobs:
 
   macos:
     # macOS minutes are the most expensive: this job only builds the DMG, and
-    # only for a new release.
-    needs: plan
+    # only for a new release whose tests passed.
+    needs: [plan, tests]
     if: needs.plan.outputs.build == 'true'
     runs-on: macos-15
     timeout-minutes: 45
@@ -110,7 +105,7 @@ jobs:
           path: dist/
 
   linux:
-    needs: plan
+    needs: [plan, tests]
     if: needs.plan.outputs.build == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -133,7 +128,7 @@ jobs:
             apps/desktop/src-tauri/target/release/bundle/rpm/*.rpm
 
   release:
-    needs: [plan, windows, macos, linux]
+    needs: [plan, tests, windows, macos, linux]
     if: needs.plan.outputs.release == 'true' && github.repository == 'elarydil/elarydil-kvm' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -142,14 +137,6 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4
-      - name: Require the Linux checks on this commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          check_run=$(gh run list --workflow ci.yml --commit "$GITHUB_SHA" --limit 1 --json databaseId --jq '.[0].databaseId')
-          test -n "$check_run"
-          test "$check_run" != "null"
-          gh run watch "$check_run" --exit-status --interval 10
       - uses: actions/download-artifact@v4
         with:
           pattern: elarydil-kvm-*

@@ -1,16 +1,13 @@
 name: build-and-test
-# Linux tests for pull requests and pushes to main. Windows tests and the
-# installers for every platform live in native-installers.yml.
+# The test suites. Pull requests run the Linux tests. On main this workflow is
+# called by native-installers.yml, which adds the Windows tests and builds the
+# installers only after every test here has passed.
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
-concurrency:
-  group: checks-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   linux:
     runs-on: ubuntu-24.04
@@ -30,3 +27,16 @@ jobs:
       - run: python tests/catalog_check.py
       - run: npm ci && npx playwright install --with-deps chromium && npm test && npm run build
         working-directory: apps/desktop
+
+  windows:
+    # Only on main, where native-installers.yml calls this workflow.
+    if: github.event_name != 'pull_request'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --workspace --locked
+      - run: cargo build --locked
+      - run: python tests/cli_smoke.py
+        timeout-minutes: 2
