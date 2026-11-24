@@ -4,7 +4,13 @@ use elarydil_kvm::{
 };
 use serde_json::Value;
 use std::time::{Duration, Instant};
+/// Finds the helpers Cargo built for this package, wherever the test runs from.
+fn use_built_helpers() {
+    let command = std::path::Path::new(env!("CARGO_BIN_EXE_elarydil-kvm-command"));
+    elarydil_kvm::platform::set_helper_dir(command.parent().unwrap().to_path_buf());
+}
 fn job(command: &str, timeout: u64) -> Job {
+    use_built_helpers();
     Job {
         id: "test".into(),
         rule_id: "rule".into(),

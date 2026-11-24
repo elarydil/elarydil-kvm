@@ -115,14 +115,28 @@ pub fn process_alive(pid: u32) -> bool {
         }
     }
 }
+static HELPER_DIR: std::sync::OnceLock<std::path::PathBuf> = std::sync::OnceLock::new();
+
+/// Points [`sibling`] at the directory with the built helpers first. Tests use
+/// it because Cargo may run test executables from a separate build directory,
+/// away from the binaries it builds.
+pub fn set_helper_dir(dir: std::path::PathBuf) {
+    let _ = HELPER_DIR.set(dir);
+}
+
 pub fn sibling(name: &str) -> Result<std::path::PathBuf> {
-    let exe = std::env::current_exe()?;
-    let parent = exe.parent().ok_or_else(|| Error::new("io"))?;
     let file = if cfg!(windows) {
         format!("{name}.exe")
     } else {
         name.to_string()
     };
+    if let Some(path) = HELPER_DIR.get().map(|dir| dir.join(&file)) {
+        if path.is_file() {
+            return Ok(path);
+        }
+    }
+    let exe = std::env::current_exe()?;
+    let parent = exe.parent().ok_or_else(|| Error::new("io"))?;
     for path in [
         parent.join(&file),
         parent.join("bin").join(&file),

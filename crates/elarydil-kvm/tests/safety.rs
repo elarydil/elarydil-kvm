@@ -4,6 +4,11 @@ use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
+/// Finds the helpers Cargo built for this package, wherever the test runs from.
+fn use_built_helpers() {
+    let command = std::path::Path::new(env!("CARGO_BIN_EXE_elarydil-kvm-command"));
+    elarydil_kvm::platform::set_helper_dir(command.parent().unwrap().to_path_buf());
+}
 fn config(mode: &str, k: usize) -> Config {
     let mut c = Config::default();
     c.safety.startup_grace_ms = 1000;
@@ -644,6 +649,7 @@ fn commands_respect_disabled_and_dry_run() {
 #[test]
 fn service_executes_automatic_disconnect_and_reconnect_hooks() {
     use std::time::{Duration, Instant};
+    use_built_helpers();
     let temp = tempfile::tempdir().unwrap();
     let store = Store::open(Some(temp.path().into())).unwrap();
     let mut c = config("all", 1);
