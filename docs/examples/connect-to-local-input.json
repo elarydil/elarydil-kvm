@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "app": {
+    "locale": "en-US",
+    "theme": "system",
+    "uiMode": "window-only",
+    "launchAgentAtLogin": false,
+    "launchGuiAtLogin": false,
+    "closeWindowAction": "quit-gui",
+    "notifications": "errors-only",
+    "startupDelayMs": 0,
+    "lastPage": "dashboard",
+    "logRetentionDays": 14,
+    "logMaxBytes": 20971520
+  },
+  "safety": {
+    "globalMonitorCooldownMs": 5000,
+    "startupGraceMs": 3000,
+    "resumeGraceMs": 4000,
+    "defaultDebounceMs": 400,
+    "commandTimeoutMs": 2000
+  },
+  "usbDevices": [
+    {
+      "id": "device_0",
+      "alias": "Example USB 0",
+      "enabled": true,
+      "selectors": [
+        {
+          "id": "selector_0",
+          "strategy": "vid-pid",
+          "vid": 1133,
+          "pid": 1000,
+          "serial": null,
+          "path": null,
+          "allowAmbiguous": false
+        }
+      ]
+    },
+    {
+      "id": "device_1",
+      "alias": "Example USB 1",
+      "enabled": true,
+      "selectors": [
+        {
+          "id": "selector_1",
+          "strategy": "vid-pid",
+          "vid": 1133,
+          "pid": 1001,
+          "serial": null,
+          "path": null,
+          "allowAmbiguous": false
+        }
+      ]
+    },
+    {
+      "id": "device_2",
+      "alias": "Example USB 2",
+      "enabled": true,
+      "selectors": [
+        {
+          "id": "selector_2",
+          "strategy": "vid-pid",
+          "vid": 1133,
+          "pid": 1002,
+          "serial": null,
+          "path": null,
+          "allowAmbiguous": false
+        }
+      ]
+    }
+  ],
+  "monitors": [
+    {
+      "id": "monitor_example",
+      "alias": "Example display",
+      "fingerprint": "REPLACE_WITH_REAL_EDID_FINGERPRINT",
+      "connector": null,
+      "inputOptions": [
+        {
+          "value": 17,
+          "vcpCode": 96,
+          "label": "Example PC",
+          "verified": false
+        },
+        {
+          "value": 18,
+          "vcpCode": 96,
+          "label": "Example Mac",
+          "verified": false
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "profile_example",
+      "name": "Example dry-run profile",
+      "enabled": true,
+      "rules": [
+        {
+          "id": "rule_example",
+          "name": "Example transition",
+          "enabled": true,
+          "trigger": "connect",
+          "deviceIds": [
+            "device_0",
+            "device_1"
+          ],
+          "mode": "all",
+          "minimumCount": 1,
+          "coincidenceWindowMs": 1500,
+          "debounceMs": 400,
+          "rearmMs": 500,
+          "cooldownMs": 5000,
+          "dryRun": true,
+          "actions": [
+            {
+              "id": "action_example",
+              "monitorId": "monitor_example",
+              "vcpCode": 96,
+              "inputValue": 17
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

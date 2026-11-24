@@ -1,0 +1,15 @@
+/target/
+/dist/
+**/target/
+**/node_modules/
+**/test-results/
+**/playwright-report/
+apps/desktop/dist/
+apps/desktop/src-tauri/bin/*
+!apps/desktop/src-tauri/bin/.gitkeep
+*.tsbuildinfo
+vendor/m1ddc/.objects/
+vendor/m1ddc/m1ddc
+vendor/m1ddc/library/
+
+**/__pycache__/

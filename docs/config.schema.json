@@ -1,0 +1,468 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "inputValue": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "monitorId": {
+          "type": "string"
+        },
+        "vcpCode": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "monitorId",
+        "vcpCode",
+        "inputValue"
+      ],
+      "type": "object"
+    },
+    "App": {
+      "additionalProperties": false,
+      "properties": {
+        "agentStandalone": {
+          "default": false,
+          "description": "Keep the agent running after the desktop app quits. Off by default:\nautomation normally lives and dies with the app in the menu bar.",
+          "type": "boolean"
+        },
+        "closeWindowAction": {
+          "default": "hide",
+          "type": "string"
+        },
+        "lastPage": {
+          "default": "dashboard",
+          "type": "string"
+        },
+        "launchAgentAtLogin": {
+          "default": false,
+          "type": "boolean"
+        },
+        "launchGuiAtLogin": {
+          "default": false,
+          "type": "boolean"
+        },
+        "locale": {
+          "default": "en-US",
+          "type": "string"
+        },
+        "logMaxBytes": {
+          "default": 20971520,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "logRetentionDays": {
+          "default": 14,
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "notifications": {
+          "default": "errors-only",
+          "type": "string"
+        },
+        "startupDelayMs": {
+          "default": 0,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "theme": {
+          "default": "system",
+          "type": "string"
+        },
+        "uiMode": {
+          "default": "both",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "CommandHooks": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "onConnect": {
+          "default": "",
+          "type": "string"
+        },
+        "onDisconnect": {
+          "default": "",
+          "type": "string"
+        },
+        "shell": {
+          "default": "system",
+          "type": "string"
+        },
+        "timeoutMs": {
+          "default": 10000,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workingDirectory": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Device": {
+      "additionalProperties": false,
+      "properties": {
+        "alias": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "selectors": {
+          "items": {
+            "$ref": "#/$defs/Selector"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "alias",
+        "enabled",
+        "selectors"
+      ],
+      "type": "object"
+    },
+    "Input": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "vcpCode": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "verified": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "value",
+        "vcpCode",
+        "label",
+        "verified"
+      ],
+      "type": "object"
+    },
+    "Profile": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/Rule"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "enabled",
+        "rules"
+      ],
+      "type": "object"
+    },
+    "Rule": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "type": "array"
+        },
+        "coincidenceWindowMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "commands": {
+          "$ref": "#/$defs/CommandHooks",
+          "default": {
+            "enabled": false,
+            "onConnect": "",
+            "onDisconnect": "",
+            "shell": "system",
+            "timeoutMs": 10000,
+            "workingDirectory": ""
+          }
+        },
+        "cooldownMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "debounceMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "deviceIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dryRun": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "minimumCount": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "mode": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rearmMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "trigger": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "enabled",
+        "trigger",
+        "deviceIds",
+        "mode",
+        "minimumCount",
+        "debounceMs",
+        "rearmMs",
+        "cooldownMs",
+        "dryRun",
+        "actions"
+      ],
+      "type": "object"
+    },
+    "Safety": {
+      "additionalProperties": false,
+      "properties": {
+        "commandTimeoutMs": {
+          "default": 2000,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "defaultDebounceMs": {
+          "default": 0,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "globalMonitorCooldownMs": {
+          "default": 100,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "resumeGraceMs": {
+          "default": 4000,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "startupGraceMs": {
+          "default": 3000,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "SavedMonitor": {
+      "additionalProperties": false,
+      "properties": {
+        "alias": {
+          "type": "string"
+        },
+        "connector": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "hiddenInputs": {
+          "default": [],
+          "items": {
+            "format": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "inputOptions": {
+          "items": {
+            "$ref": "#/$defs/Input"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "alias",
+        "fingerprint",
+        "inputOptions"
+      ],
+      "type": "object"
+    },
+    "Selector": {
+      "additionalProperties": false,
+      "properties": {
+        "allowAmbiguous": {
+          "default": false,
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pid": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "serial": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "strategy": {
+          "type": "string"
+        },
+        "vid": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "strategy",
+        "vid",
+        "pid"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "app": {
+      "$ref": "#/$defs/App"
+    },
+    "monitors": {
+      "items": {
+        "$ref": "#/$defs/SavedMonitor"
+      },
+      "type": "array"
+    },
+    "profiles": {
+      "items": {
+        "$ref": "#/$defs/Profile"
+      },
+      "type": "array"
+    },
+    "safety": {
+      "$ref": "#/$defs/Safety"
+    },
+    "schemaVersion": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "usbDevices": {
+      "items": {
+        "$ref": "#/$defs/Device"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "app",
+    "safety",
+    "usbDevices",
+    "monitors",
+    "profiles"
+  ],
+  "title": "Config",
+  "type": "object"
+}

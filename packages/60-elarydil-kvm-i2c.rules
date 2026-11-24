@@ -1,0 +1,4 @@
+# Administrator-reviewed Linux permission option; never installed automatically.
+# Create the i2c group and add only the intended desktop user, then log out/in.
+# This grants that group access to I2C adapters; review your machine's devices.
+KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
